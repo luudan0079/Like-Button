@@ -4,6 +4,7 @@ import android.animation.ArgbEvaluator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
@@ -16,8 +17,8 @@ import android.view.View;
  * @modifier Varun
  */
 public class CircleView extends View {
-    private int startColor = 0xFFFF5722;
-    private int endColor = 0xFFFFC107;
+    private int startColor = Color.WHITE;
+    private int endColor = Color.WHITE;
 
     private ArgbEvaluator argbEvaluator = new ArgbEvaluator();
 
@@ -68,10 +69,12 @@ public class CircleView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        tempCanvas.drawColor(0xffffff, PorterDuff.Mode.CLEAR);
-        tempCanvas.drawCircle(getWidth() / 2, getHeight() / 2, outerCircleRadiusProgress * maxCircleSize, circlePaint);
-        tempCanvas.drawCircle(getWidth() / 2, getHeight() / 2, innerCircleRadiusProgress * maxCircleSize, maskPaint);
-        canvas.drawBitmap(tempBitmap, 0, 0, null);
+        if(tempCanvas != null) {
+            tempCanvas.drawColor(0xffffff, PorterDuff.Mode.CLEAR);
+            tempCanvas.drawCircle(getWidth() / 2, getHeight() / 2, outerCircleRadiusProgress * maxCircleSize, circlePaint);
+            tempCanvas.drawCircle(getWidth() / 2, getHeight() / 2, innerCircleRadiusProgress * maxCircleSize, maskPaint);
+            canvas.drawBitmap(tempBitmap, 0, 0, null);
+        }
     }
 
     public void setColors(int startColor, int endColor) {

@@ -27,7 +27,7 @@ import com.varunest.sparkbutton.helpers.Utils;
 /**
  * @author varun 7th July 2016
  */
-public class SparkButton extends FrameLayout implements View.OnClickListener {
+public class SparkButton extends FrameLayout {
     private static final DecelerateInterpolator DECELERATE_INTERPOLATOR = new DecelerateInterpolator();
     private static final AccelerateDecelerateInterpolator ACCELERATE_DECELERATE_INTERPOLATOR = new AccelerateDecelerateInterpolator();
     private static final OvershootInterpolator OVERSHOOT_INTERPOLATOR = new OvershootInterpolator(4);
@@ -56,10 +56,11 @@ public class SparkButton extends FrameLayout implements View.OnClickListener {
     boolean isChecked = false;
 
     private AnimatorSet animatorSet;
-    private SparkEventListener listener;
+    public SparkEventListener listener;
 
-    SparkButton(Context context) {
+    public SparkButton(Context context) {
         super(context);
+        init();
     }
 
     public SparkButton(Context context, AttributeSet attrs) {
@@ -81,47 +82,16 @@ public class SparkButton extends FrameLayout implements View.OnClickListener {
         init();
     }
 
-    public void setColors(int startColor, int endColor) {
-        this.secondaryColor = startColor;
-        this.primaryColor = endColor;
-    }
-
     public void setAnimationSpeed(float animationSpeed) {
         this.animationSpeed = animationSpeed;
     }
 
     void init() {
-        circleSize = (int) (imageSize * CIRCLEVIEW_SIZE_FACTOR);
-        dotsSize = (int) (imageSize * DOTVIEW_SIZE_FACTOR);
-
         LayoutInflater.from(getContext()).inflate(R.layout.layout_spark_button, this, true);
         circleView = (CircleView) findViewById(R.id.vCircle);
-        circleView.setColors(secondaryColor, primaryColor);
-        circleView.getLayoutParams().height = circleSize;
-        circleView.getLayoutParams().width = circleSize;
-
         dotsView = (DotsView) findViewById(R.id.vDotsView);
-        dotsView.getLayoutParams().width = dotsSize;
-        dotsView.getLayoutParams().height = dotsSize;
-        dotsView.setColors(secondaryColor, primaryColor);
-        dotsView.setMaxDotSize((int) (imageSize * DOTS_SIZE_FACTOR));
-
         imageView = (ImageView) findViewById(R.id.ivImage);
-
-        imageView.getLayoutParams().height = imageSize;
-        imageView.getLayoutParams().width = imageSize;
-        if (imageResourceIdInactive != INVALID_RESOURCE_ID) {
-            // should load inactive img first
-            imageView.setImageResource(imageResourceIdInactive);
-            imageView.setColorFilter(inActiveImageTint, PorterDuff.Mode.SRC_ATOP);
-        } else if (imageResourceIdActive != INVALID_RESOURCE_ID) {
-            imageView.setImageResource(imageResourceIdActive);
-            imageView.setColorFilter(activeImageTint, PorterDuff.Mode.SRC_ATOP);
-        } else {
-            throw new IllegalArgumentException("One of Inactive/Active Image Resources are required!!");
-        }
-        setOnTouchListener();
-        setOnClickListener(this);
+//        setOnTouchListener();
     }
 
     /**
@@ -131,7 +101,6 @@ public class SparkButton extends FrameLayout implements View.OnClickListener {
         if (animatorSet != null) {
             animatorSet.cancel();
         }
-
         imageView.animate().cancel();
         imageView.setScaleX(0);
         imageView.setScaleY(0);
@@ -140,6 +109,10 @@ public class SparkButton extends FrameLayout implements View.OnClickListener {
         dotsView.setCurrentProgress(0);
 
         animatorSet = new AnimatorSet();
+
+        ObjectAnimator alphaAnimator = ObjectAnimator.ofFloat(imageView, ImageView.ALPHA, 1f);
+        alphaAnimator.setDuration((long) (500 / animationSpeed));
+        alphaAnimator.setStartDelay((long) (2000 / animationSpeed));
 
         ObjectAnimator outerCircleAnimator = ObjectAnimator.ofFloat(circleView, CircleView.OUTER_CIRCLE_RADIUS_PROGRESS, 0.1f, 1f);
         outerCircleAnimator.setDuration((long) (250 / animationSpeed));
@@ -152,24 +125,63 @@ public class SparkButton extends FrameLayout implements View.OnClickListener {
 
         ObjectAnimator starScaleYAnimator = ObjectAnimator.ofFloat(imageView, ImageView.SCALE_Y, 0.2f, 1f);
         starScaleYAnimator.setDuration((long) (350 / animationSpeed));
-        starScaleYAnimator.setStartDelay((long) (250 / animationSpeed));
         starScaleYAnimator.setInterpolator(OVERSHOOT_INTERPOLATOR);
 
         ObjectAnimator starScaleXAnimator = ObjectAnimator.ofFloat(imageView, ImageView.SCALE_X, 0.2f, 1f);
         starScaleXAnimator.setDuration((long) (350 / animationSpeed));
-        starScaleXAnimator.setStartDelay((long) (250 / animationSpeed));
         starScaleXAnimator.setInterpolator(OVERSHOOT_INTERPOLATOR);
+
+
+        ObjectAnimator starScaleYAnimator1 = ObjectAnimator.ofFloat(imageView, ImageView.SCALE_Y, 1f, 0.8f);
+        starScaleYAnimator.setDuration((long) (500 / animationSpeed));
+        starScaleYAnimator.setInterpolator(OVERSHOOT_INTERPOLATOR);
+
+        ObjectAnimator starScaleXAnimator1 = ObjectAnimator.ofFloat(imageView, ImageView.SCALE_X, 1f, 0.8f);
+        starScaleXAnimator.setDuration((long) (500 / animationSpeed));
+        starScaleXAnimator.setInterpolator(OVERSHOOT_INTERPOLATOR);
+
+        ObjectAnimator alphaAnimator1 = ObjectAnimator.ofFloat(this, ImageView.ALPHA, 0.0f);
+        alphaAnimator1.setDuration((long) (500 / animationSpeed));
+        alphaAnimator1.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                setAlpha(1f);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
+        AnimatorSet set1 = new AnimatorSet();
+        set1.playTogether(starScaleXAnimator, starScaleYAnimator);
+        AnimatorSet set2 = new AnimatorSet();
+        set2.playTogether(starScaleXAnimator1, starScaleYAnimator1, alphaAnimator1);
+        AnimatorSet set = new AnimatorSet();
+        set.playSequentially(set1, set2);
+        set.setStartDelay((long) (250 / animationSpeed));
 
         ObjectAnimator dotsAnimator = ObjectAnimator.ofFloat(dotsView, DotsView.DOTS_PROGRESS, 0, 1f);
         dotsAnimator.setDuration((long) (900 / animationSpeed));
         dotsAnimator.setStartDelay((long) (50 / animationSpeed));
         dotsAnimator.setInterpolator(ACCELERATE_DECELERATE_INTERPOLATOR);
 
+
         animatorSet.playTogether(
                 outerCircleAnimator,
                 innerCircleAnimator,
-                starScaleYAnimator,
-                starScaleXAnimator,
+                set,
                 dotsAnimator
         );
 
@@ -187,7 +199,7 @@ public class SparkButton extends FrameLayout implements View.OnClickListener {
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 if (listener != null) {
-                    listener.onEventAnimationEnd(imageView,isChecked);
+                    listener.onEventAnimationEnd(imageView, isChecked);
                 }
             }
 
@@ -195,11 +207,10 @@ public class SparkButton extends FrameLayout implements View.OnClickListener {
             public void onAnimationStart(Animator animation) {
                 super.onAnimationEnd(animation);
                 if (listener != null) {
-                    listener.onEventAnimationStart(imageView,isChecked);
+                    listener.onEventAnimationStart(imageView, isChecked);
                 }
             }
         });
-
         animatorSet.start();
     }
 
@@ -222,16 +233,42 @@ public class SparkButton extends FrameLayout implements View.OnClickListener {
         imageView.setImageResource(isChecked ? imageResourceIdActive : imageResourceIdInactive);
         imageView.setColorFilter(isChecked ? activeImageTint : inActiveImageTint, PorterDuff.Mode.SRC_ATOP);
     }
-    
-    public void setInactiveImage(int inactiveResource){
+
+    private void setInactiveImage(int inactiveResource) {
         this.imageResourceIdInactive = inactiveResource;
-        imageView.setImageResource(isChecked ? imageResourceIdActive : imageResourceIdInactive);;
+        imageView.setImageResource(isChecked ? imageResourceIdActive : imageResourceIdInactive);
     }
 
-    public void setActiveImage(int activeResource){
+    private void setActiveImage(int activeResource) {
         this.imageResourceIdActive = activeResource;
-        imageView.setImageResource(isChecked ? imageResourceIdActive : imageResourceIdInactive);;
+        imageView.setImageResource(isChecked ? imageResourceIdActive : imageResourceIdInactive);
     }
+
+    public void setImageState(int activeResource, int inactiveResource) {
+        this.imageResourceIdActive = activeResource;
+        this.imageResourceIdInactive = inactiveResource;
+        imageView.setImageResource(isChecked ? imageResourceIdActive : imageResourceIdInactive);
+    }
+
+    public void setColors(int startColor, int endColor) {
+        this.secondaryColor = startColor;
+        this.primaryColor = endColor;
+        circleView.setColors(secondaryColor, primaryColor);
+        dotsView.setColors(secondaryColor, primaryColor);
+    }
+
+    public void setImageSize(int size) {
+        imageSize = size;
+        circleSize = (int) (imageSize * CIRCLEVIEW_SIZE_FACTOR);
+        dotsSize = (int) (imageSize * DOTVIEW_SIZE_FACTOR);
+        circleView.getLayoutParams().height = circleSize;
+        circleView.getLayoutParams().width = circleSize;
+
+        dotsView.getLayoutParams().width = dotsSize;
+        dotsView.getLayoutParams().height = dotsSize;
+        dotsView.setMaxDotSize((int) (imageSize * DOTS_SIZE_FACTOR));
+    }
+
 
     public void setEventListener(SparkEventListener listener) {
         this.listener = listener;
@@ -242,13 +279,11 @@ public class SparkButton extends FrameLayout implements View.OnClickListener {
         init();
     }
 
-    @Override
-    public void onClick(View v) {
+    public void like() {
+        isChecked = true;
         if (imageResourceIdInactive != INVALID_RESOURCE_ID) {
-            isChecked = !isChecked;
-
-            imageView.setImageResource(isChecked ? imageResourceIdActive : imageResourceIdInactive);
-            imageView.setColorFilter(isChecked ? activeImageTint : inActiveImageTint, PorterDuff.Mode.SRC_ATOP);
+            imageView.setImageResource(imageResourceIdActive);
+            imageView.setColorFilter(activeImageTint, PorterDuff.Mode.SRC_ATOP);
 
             if (animatorSet != null) {
                 animatorSet.cancel();
