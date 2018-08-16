@@ -168,6 +168,7 @@ public class SparkButton extends FrameLayout {
         set1.playTogether(starScaleXAnimator, starScaleYAnimator);
         AnimatorSet set2 = new AnimatorSet();
         set2.playTogether(starScaleXAnimator1, starScaleYAnimator1, alphaAnimator1);
+        set2.setStartDelay(200);
         AnimatorSet set = new AnimatorSet();
         set.playSequentially(set1, set2);
         set.setStartDelay((long) (250 / animationSpeed));
@@ -176,7 +177,6 @@ public class SparkButton extends FrameLayout {
         dotsAnimator.setDuration((long) (900 / animationSpeed));
         dotsAnimator.setStartDelay((long) (50 / animationSpeed));
         dotsAnimator.setInterpolator(ACCELERATE_DECELERATE_INTERPOLATOR);
-
 
         animatorSet.playTogether(
                 outerCircleAnimator,
@@ -188,6 +188,7 @@ public class SparkButton extends FrameLayout {
         animatorSet.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationCancel(Animator animation) {
+                animatorSet = null;
                 circleView.setInnerCircleRadiusProgress(0);
                 circleView.setOuterCircleRadiusProgress(0);
                 dotsView.setCurrentProgress(0);
@@ -198,6 +199,7 @@ public class SparkButton extends FrameLayout {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
+                animatorSet = null;
                 if (listener != null) {
                     listener.onEventAnimationEnd(imageView, isChecked);
                 }
@@ -205,7 +207,7 @@ public class SparkButton extends FrameLayout {
 
             @Override
             public void onAnimationStart(Animator animation) {
-                super.onAnimationEnd(animation);
+                super.onAnimationStart(animation);
                 if (listener != null) {
                     listener.onEventAnimationStart(imageView, isChecked);
                 }
@@ -280,22 +282,15 @@ public class SparkButton extends FrameLayout {
     }
 
     public void like() {
-        isChecked = true;
+        if (animatorSet != null) {
+            return;
+        }
         if (imageResourceIdInactive != INVALID_RESOURCE_ID) {
             imageView.setImageResource(imageResourceIdActive);
             imageView.setColorFilter(activeImageTint, PorterDuff.Mode.SRC_ATOP);
-
-            if (animatorSet != null) {
-                animatorSet.cancel();
-            }
-            if (isChecked) {
-                circleView.setVisibility(View.VISIBLE);
-                dotsView.setVisibility(VISIBLE);
-                playAnimation();
-            } else {
-                dotsView.setVisibility(INVISIBLE);
-                circleView.setVisibility(View.GONE);
-            }
+            circleView.setVisibility(View.VISIBLE);
+            dotsView.setVisibility(VISIBLE);
+            playAnimation();
         } else {
             playAnimation();
         }
