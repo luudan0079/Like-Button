@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     stages {
-        stage('Example 1')
+        stage('Example 1') {
             steps {
                 echo 'Example 1'
                 cucumber fileIncludePattern: '/cucumber-report.json', sortingMethod: 'ALPHABETICAL'
