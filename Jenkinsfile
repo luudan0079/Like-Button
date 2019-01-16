@@ -6,7 +6,6 @@ pipeline {
             steps {
                 echo 'Example 1'
                 cucumber fileIncludePattern: '**/cucumber-report.json', sortingMethod: 'ALPHABETICAL'
-                jsonReportDirectory: 'target'
             }
         }
         stage('Example 2') {
