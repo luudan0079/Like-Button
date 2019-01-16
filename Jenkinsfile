@@ -2,7 +2,18 @@ pipeline {
     agent any
 
     stages {
-        stage('Example 1') {
+
+        stage('Compile stage') {
+            steps {
+                sh 'mvn clean install'
+            }
+        }
+        stage('Test stage') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+        stage('Cucumber report') {
             steps {
                 echo 'Example 1'
                 cucumber fileIncludePattern: '**/cucumber-report.json', sortingMethod: 'ALPHABETICAL'
