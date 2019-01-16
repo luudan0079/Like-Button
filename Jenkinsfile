@@ -5,7 +5,8 @@ pipeline {
         stage('Example 1') {
             steps {
                 echo 'Example 1'
-                cucumber fileIncludePattern: '/cucumber-report.json', sortingMethod: 'ALPHABETICAL'
+                archiveArtifacts '**/java-calculator-*-SNAPSHOT.jar'
+                cucumber fileIncludePattern: '**/java-calculator/target/cucumber-report.json', sortingMethod: 'ALPHABETICAL'
             }
         }
         stage('Example 2') {
