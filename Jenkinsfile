@@ -3,25 +3,10 @@ pipeline {
 
     stages {
 
-        stage('Compile stage') {
-            steps {
-                sh 'mvn clean install'
-            }
-        }
-        stage('Test stage') {
-            steps {
-                sh 'mvn test'
-            }
-        }
         stage('Cucumber report') {
             steps {
                 echo 'Example 1'
                 cucumber fileIncludePattern: '**/cucumber-report.json', sortingMethod: 'ALPHABETICAL'
-            }
-        }
-        stage('Example 2') {
-            steps {
-                echo 'Example 2'
             }
         }
     }
